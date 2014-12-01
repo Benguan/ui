@@ -1,0 +1,21 @@
+<project name="Biz.Resource.build" default="build" basedir=".">
+  <description>Biz Resource Build File</description>
+  <import file="../../../05_Release/common.xml"/>
+  <property name="module.name" value="Biz.Resource"/>
+  <property name="module.dir" value="${release.dir}\Biz"/>
+  <property name="src.dir" location="./src"/>
+
+
+  <target name="concat"  >
+    <echo>${src.dir}\${module.dir}\${module.name}</echo>
+    <concat destfile="${module.dir}\Resource.js" encoding="${charset}" outputencoding="${charset}">
+      <fileset dir="${src.dir}" includes="**/*.js" />
+      <filterchain>
+        <deletecharacters chars="&#xFEFF;" />
+      </filterchain>
+    </concat>
+  </target>
+
+  <target name="build" depends="concat">
+  </target>
+</project>

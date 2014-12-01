@@ -1,0 +1,20 @@
+<project name="NEG.Widget.History.build" default="build" basedir=".">
+  <description>NEG Widget History Build File</description>
+  <import file="../../../../05_Release/common.xml"/>
+  <property name="module.name" value="NEG.Widget.History"/>
+  <property name="module.dir" value="${release.dir}\NEG\Widget"/>
+  <property name="src.dir" location="./src"/>
+
+  <target name="concat" >
+    <echo>${src.dir}\${module.dir}\${module.name}</echo>
+    <concat destfile="${module.dir}/History.js" encoding="${charset}" outputencoding="${charset}">
+      <fileset dir="${src.dir}" includes="**/*.js" />
+      <filterchain>
+        <deletecharacters chars="&#xFEFF;" />
+      </filterchain>
+    </concat>
+  </target>
+
+  <target name="build" depends="concat">
+  </target>
+</project>

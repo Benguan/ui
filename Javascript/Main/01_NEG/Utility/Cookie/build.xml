@@ -1,0 +1,24 @@
+<project name="Utility.Cookie.build" default="build" basedir=".">
+  <description>Utility Cookie Build File</description>
+  <import file="../../../05_Release/common.xml"/>
+  <property name="module.name" value="Utility.Cookie"/>
+  <property name="module.dir" value="${release.dir}\Utility"/>
+  <property name="src.dir" location="./src"/>
+
+  <target name="concat" >
+    <echo>${src.dir}\${module.dir}\${module.name}</echo>
+    <concat destfile="${module.dir}\Cookie.js" encoding="${charset}" outputencoding="${charset}">
+      <!-- fileset dir="${src.dir}" includes="**/*.js"/ -->
+      <path path="${src.dir}/Config.js"></path>
+      <path path="${src.dir}/CookieName.js"></path>
+      <path path="${src.dir}/SubCookies.js"></path>
+      <path path="${src.dir}/Cookie.js"></path>
+      <filterchain>
+        <deletecharacters chars="&#xFEFF;" />
+      </filterchain>
+    </concat>
+  </target>
+
+  <target name="build" depends="concat">
+  </target>
+</project>

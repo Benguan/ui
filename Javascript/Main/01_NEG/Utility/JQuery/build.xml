@@ -1,0 +1,24 @@
+<project name="Utility.jQuery.build" default="build" basedir=".">
+  <description>Utility jQuery Build File</description>
+  <import file="../../../05_Release/common.xml"/>
+  <property name="module.name" value="Utility.jQuery"/>
+  <property name="module.dir" value="${release.dir}\Utility"/>
+  <property name="src.dir" location="./src"/>
+
+  <target name="concat" >
+    <echo>${src.dir}\${module.dir}\${module.name}</echo>
+    <concat destfile="${module.dir}\jQuery.js" encoding="${charset}" outputencoding="${charset}">
+      <!-- fileset dir="${src.dir}" includes="**/*.js" / -->
+      <path path="${src.dir}/jquery-1.8.3.min.js"></path>
+      <path path="${src.dir}/jQuery.js"></path>
+
+      <filterchain>
+        <deletecharacters chars="&#xFEFF;" />
+      </filterchain>
+    </concat>
+  </target>
+
+
+  <target name="build" depends="concat">
+  </target>
+</project>

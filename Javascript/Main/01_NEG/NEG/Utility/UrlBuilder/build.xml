@@ -1,0 +1,20 @@
+<project name="NEG.Widget.Form.Textarea.build" default="build" basedir=".">
+  <description>NEG Utility QueryString.QueryString Build File</description>
+  <import file="../../../../05_Release/common.xml"/>
+  <property name="module.name" value="NEG.Utility.UrlBuilder"/>
+  <property name="module.dir" value="${release.dir}\NEG\Utility"/>
+  <property name="src.dir" location="./src"/>
+
+  <target name="concat" >
+    <echo>${src.dir}\${module.dir}\${module.name}</echo>
+    <concat destfile="${module.dir}/UrlBuilder.js" encoding="${charset}" outputencoding="${charset}">
+      <fileset dir="${src.dir}" includes="**/*.js" />
+      <filterchain>
+        <deletecharacters chars="&#xFEFF;" />
+      </filterchain>
+    </concat>
+  </target>
+
+  <target name="build" depends="concat">
+  </target>
+</project>

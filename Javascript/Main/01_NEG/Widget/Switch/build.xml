@@ -1,0 +1,21 @@
+<project name="Widget.Switch.build" default="build" basedir=".">
+  <description>Widget Switch Build File</description>
+  <import file="../../../05_Release/common.xml"/>
+  <property name="module.name" value="Widget.Switch"/>
+  <property name="module.dir" value="${release.dir}\Widget"/>
+  <property name="src.dir" location="./src"/>
+
+  <target name="concat" >
+    <echo>${src.dir}\${module.dir}\${module.name}</echo>
+    <concat destfile="${module.dir}\Switch.js" encoding="${charset}" outputencoding="${charset}">
+      <!-- fileset dir="${src.dir}" includes="**/*.js"/ -->
+      <path path="${src.dir}/Switch.js"></path>
+      <filterchain>
+        <deletecharacters chars="&#xFEFF;" />
+      </filterchain>
+    </concat>
+  </target>
+
+  <target name="build" depends="concat">
+  </target>
+</project>

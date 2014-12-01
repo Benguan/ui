@@ -1,0 +1,24 @@
+<project name="Utility.JSON.build" default="build" basedir=".">
+  <description>Utility JSON Build File</description>
+  <import file="../../../05_Release/common.xml"/>
+  <property name="module.name" value="Utility.JSON"/>
+  <property name="module.dir" value="${release.dir}\Utility"/>
+  <property name="src.dir" location="./src"/>
+
+  <target name="concat" >
+    <echo>${src.dir}\${module.dir}\${module.name}</echo>
+    <concat destfile="${module.dir}\JSON.js" encoding="${charset}" outputencoding="${charset}">
+      <!-- fileset dir="${src.dir}" includes="**/*.js" / -->
+      <path path="${src.dir}/json2.js"></path>
+      <path path="${src.dir}/JSON.js"></path>
+
+      <filterchain>
+        <deletecharacters chars="&#xFEFF;" />
+      </filterchain>
+    </concat>
+  </target>
+
+
+  <target name="build" depends="concat">
+  </target>
+</project>

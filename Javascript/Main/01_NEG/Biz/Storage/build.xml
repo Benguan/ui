@@ -1,0 +1,22 @@
+<project name="Biz.Cookie.build" default="build" basedir=".">
+  <description>Biz Cookie Build File</description>
+  <import file="../../../05_Release/common.xml"/>
+  <property name="module.name" value="Biz.Storage"/>
+  <property name="module.dir" value="${release.dir}\Biz"/>
+  <property name="src.dir" location="./src"/>
+
+
+  <target name="concat"  >
+    <echo>${src.dir}\${module.dir}\${module.name}</echo>
+    <concat destfile="${module.dir}\Storage.js" encoding="${charset}" outputencoding="${charset}">
+     
+      <path path="${src.dir}/Storage.js"></path>
+      <filterchain>
+        <deletecharacters chars="&#xFEFF;" />
+      </filterchain>
+    </concat>
+  </target>
+
+  <target name="build" depends="concat">
+  </target>
+</project>
