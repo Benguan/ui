@@ -16,7 +16,7 @@
         var scripts = document.getElementsByTagName("script");
         for (var i = scripts.length - 1 ; i >= 0 ; i--) {
             var theScript = scripts[i];
-            if (/NEG.0.2.2.js/.test(theScript.src)) {
+            if (/[$NEGFileName$]/.test(theScript.src)) {
                 return theScript;
             }
         }
@@ -25,9 +25,9 @@
     var base = {
         avatarCore: avatar.prototype,
         base: _neg,
-        baseURL: (selfElement && selfElement.src.replace(/\/[^\/]+$/, '/')) || '',
+        baseURL: (selfElement && selfElement.src.replace(/\/[^\/]+$/, '/')) || [$baseURL$],
         CDNTimestamp: (selfElement && selfElement.getAttribute('data-CDNTimestamp')) || '',
-        isDebug: true,
+        isDebug: [$isDebug$],
         init: function () {
             Global.NEG = neg.base.merge(neg, _neg);
             Global.NEGfixForOldVersion && base.blend(neg, Global.NEGfixForOldVersion, { cover: false });
@@ -46,194 +46,200 @@
     Global.NEG = _neg;
 })(this);
 
+
 ; (function (neg) {
     "use strict";
     var internalClass = {};
 
-    internalClass._String = (function () {
-        var constructor = function (str) {
-            this.source = str;
-        };
 
-        var thePrototype = (function () {
-            var result = {};
-            var sp = String.prototype;
-            var baseFn = ["valueOf", "toString", "charAt", "charCodeAt", "concat", "indexOf", "lastIndexOf", "localeCompare", "match", "replace", "search", "slice", "split", "sub", "sup",
-                "substring", "substr", "toLowerCase", "toLocaleLowerCase", "toUpperCase", "toLocaleUpperCase", "anchor", "link", "fontcolor", "fontsize", "big", "blink", "bold", "fixed", "italics", "small", "strike"];
-            for (var i = 0; i < baseFn.length ; i++) {
-                (function (arg) {
-                    result[arg] = function () {
-                        return sp[arg].apply(this.source, arguments);
-                    };
-                })(baseFn[i]);
-            }
-
-            //ECMAScript5 functions implement
-            if ("trim" in sp && sp.trim) {
-                result.trim = function () {
-                    return sp.trim.apply(this.source, arguments);
-                };
-            } else {
-                result.trim = function () {
-                    return this.source.replace(/(^\s+)|(\s+$)/g, '');
-                };
-            }
-
-            if ("trimLeft" in sp && sp.trim) {
-                result.trimLeft = function () {
-                    return sp.trimLeft.apply(this.source, arguments);
-                };
-            } else {
-                result.trimLeft = function () {
-                    return this.source.replace(/^\s+/, '');
-                };
-            }
-
-            if ("trimRight" in sp && sp.trim) {
-                result.trimRight = function () {
-                    return sp.trimRight.apply(this.source, arguments);
-                };
-            } else {
-                result.trimRight = function () {
-                    return this.source.replace(/\s+$/, '');
-                };
-            }
-
-            return result;
-        })();
-
-
-        //begin customlize function
-        thePrototype.constructor = constructor;
-
-
-        constructor.prototype = thePrototype;
-        return constructor;
-    })();
-
-
-    internalClass._Array = (function () {
-        var constructor = function (array) {
-            this.source = array;
-        };
-
-        var thePrototype = (function () {
-            var result = {};
-            var ap = Array.prototype;
-            var baseFn = ["join", "toString", "pop", "push", "concat", "reverse", "shift", "unshift", "slice", "splice", "sort"];
-            for (var i = 0; i < baseFn.length ; i++) {
-                (function (arg) {
-                    result[arg] = function () {
-                        return ap[arg].apply(this.source, arguments);
-                    };
-                })(baseFn[i]);
-            }
-
-            //ECMAScript5 functions implement
-            if ("indexOf" in ap && ap.indexOf) {
-                result.indexOf = function () {
-                    return ap.indexOf.apply(this.source, arguments);
-                };
-            } else {
-                result.indexOf = function (obj) {
-                    var i = this.source.length;
-                    for (; i--;) {
-                        if (this.source[i] === obj) {
-                            break;
-                        }
-                    }
-                    return i;
-                };
-            }
-            result.addRange = function (array) {
-                if (array) {
-                    var len = array.length;
-                    if (len && array instanceof Array) {
-                        len > 0 && ap.push.apply(this.source, array);
-                    } else {
-                        this.source.push(array);
-                    }
-                    return this.source.length;
-                }
-            };
-            return result;
-        })();
-
-        //begin customlize function
-        thePrototype.constructor = constructor;
-
-        thePrototype.each = function (fn) {
-            var len = this.source.length;
-            for (var i = 0; i < len; i++) {
-                var res = fn.apply(this.source[i], [this.source[i], i]);
-                if (res) {
-                    break;
-                }
-            };
-        };
-
-        thePrototype.get = function (index) {
-            if (typeof index == "number") {
-                return this.source[index];
-            }
-            return null;
-        };
-
-        constructor.prototype = thePrototype;
-        return constructor;
-    })();
-
-
-    neg.cast = function (toBeTransfered) {
-        var res = null;
-        var typeStr = typeof (toBeTransfered);
-
-        //switch (typeStr) {
-        //    case "string":
-        //        res = new internalClass.String(toBeTransfered);
-        //        break;
-
-        //    case "number":
-        //        break;
-
-        //    case "boolean":
-        //        break;
-
-        //    case "object":
-        //        if (toBeTransfered instanceof String) {
-        //            res = new internalClass.String(toBeTransfered.toString());
-        //        }
-        //        else if (toBeTransfered instanceof Array) {
-        //            res = new internalClass.Array(toBeTransfered);
-        //        }
-
-        //        break;
-
-        //    case "undefined":
-        //    default:
-        //}
-
-        if (typeStr == "string") {
-            return new internalClass._String(new String(toBeTransfered));
-        }
-        else if (typeStr == "object") {
-            if (toBeTransfered instanceof String) {
-                res = new internalClass._String(toBeTransfered);
-            }
-            else if (toBeTransfered instanceof internalClass._String.constructor) {
-                return toBeTransfered;
-            }
-            else if (toBeTransfered instanceof Array) {
-                res = new internalClass._Array(toBeTransfered);
-            }
-            else if (toBeTransfered instanceof internalClass._Array.constructor) {
-                return toBeTransfered;
-            }
-        }
-        return res;
+internalClass._String = (function () {
+    var constructor = function (str) {
+        this.source = str;
     };
 
+    var thePrototype = (function () {
+        var result = {};
+        var sp = String.prototype;
+        var baseFn = ["valueOf", "toString", "charAt", "charCodeAt", "concat", "indexOf", "lastIndexOf", "localeCompare", "match", "replace", "search", "slice", "split", "sub", "sup",
+            "substring", "substr", "toLowerCase", "toLocaleLowerCase", "toUpperCase", "toLocaleUpperCase", "anchor", "link", "fontcolor", "fontsize", "big", "blink", "bold", "fixed", "italics", "small", "strike"];
+        for (var i = 0; i < baseFn.length ; i++) {
+            (function (arg) {
+                result[arg] = function () {
+                    return sp[arg].apply(this.source, arguments);
+                };
+            })(baseFn[i]);
+        }
+
+        //ECMAScript5 functions implement
+        if ("trim" in sp && sp.trim) {
+            result.trim = function () {
+                return sp.trim.apply(this.source, arguments);
+            };
+        } else {
+            result.trim = function () {
+                return this.source.replace(/(^\s+)|(\s+$)/g, '');
+            };
+        }
+
+        if ("trimLeft" in sp && sp.trim) {
+            result.trimLeft = function () {
+                return sp.trimLeft.apply(this.source, arguments);
+            };
+        } else {
+            result.trimLeft = function () {
+                return this.source.replace(/^\s+/, '');
+            };
+        }
+
+        if ("trimRight" in sp && sp.trim) {
+            result.trimRight = function () {
+                return sp.trimRight.apply(this.source, arguments);
+            };
+        } else {
+            result.trimRight = function () {
+                return this.source.replace(/\s+$/, '');
+            };
+        }
+
+        return result;
+    })();
+
+
+    //begin customlize function
+    thePrototype.constructor = constructor;
+
+
+    constructor.prototype = thePrototype;
+    return constructor;
+})();
+
+
+
+internalClass._Array = (function () {
+    var constructor = function (array) {
+        this.source = array;
+    };
+
+    var thePrototype = (function () {
+        var result = {};
+        var ap = Array.prototype;
+        var baseFn = ["join", "toString", "pop", "push", "concat", "reverse", "shift", "unshift", "slice", "splice", "sort"];
+        for (var i = 0; i < baseFn.length ; i++) {
+            (function (arg) {
+                result[arg] = function () {
+                    return ap[arg].apply(this.source, arguments);
+                };
+            })(baseFn[i]);
+        }
+
+        //ECMAScript5 functions implement
+        if ("indexOf" in ap && ap.indexOf) {
+            result.indexOf = function () {
+                return ap.indexOf.apply(this.source, arguments);
+            };
+        } else {
+            result.indexOf = function (obj) {
+                var i = this.source.length;
+                for (; i--;) {
+                    if (this.source[i] === obj) {
+                        break;
+                    }
+                }
+                return i;
+            };
+        }
+        result.addRange = function (array) {
+            if (array) {
+                var len = array.length;
+                if (len && array instanceof Array) {
+                    len > 0 && ap.push.apply(this.source, array);
+                } else {
+                    this.source.push(array);
+                }
+                return this.source.length;
+            }
+        };
+        return result;
+    })();
+
+    //begin customlize function
+    thePrototype.constructor = constructor;
+
+    thePrototype.each = function (fn) {
+        var len = this.source.length;
+        for (var i = 0; i < len; i++) {
+            var res = fn.apply(this.source[i], [this.source[i], i]);
+            if (res) {
+                break;
+            }
+        };
+    };
+
+    thePrototype.get = function (index) {
+        if (typeof index == "number") {
+            return this.source[index];
+        }
+        return null;
+    };
+
+    constructor.prototype = thePrototype;
+    return constructor;
+})();
+
+
+
+neg.cast = function (toBeTransfered) {
+    var res = null;
+    var typeStr = typeof (toBeTransfered);
+
+    //switch (typeStr) {
+    //    case "string":
+    //        res = new internalClass.String(toBeTransfered);
+    //        break;
+
+    //    case "number":
+    //        break;
+
+    //    case "boolean":
+    //        break;
+
+    //    case "object":
+    //        if (toBeTransfered instanceof String) {
+    //            res = new internalClass.String(toBeTransfered.toString());
+    //        }
+    //        else if (toBeTransfered instanceof Array) {
+    //            res = new internalClass.Array(toBeTransfered);
+    //        }
+
+    //        break;
+
+    //    case "undefined":
+    //    default:
+    //}
+
+    if (typeStr == "string") {
+        return new internalClass._String(new String(toBeTransfered));
+    }
+    else if (typeStr == "object") {
+        if (toBeTransfered instanceof String) {
+            res = new internalClass._String(toBeTransfered);
+        }
+        else if (toBeTransfered instanceof internalClass._String.constructor) {
+            return toBeTransfered;
+        }
+        else if (toBeTransfered instanceof Array) {
+            res = new internalClass._Array(toBeTransfered);
+        }
+        else if (toBeTransfered instanceof internalClass._Array.constructor) {
+            return toBeTransfered;
+        }
+    }
+    return res;
+};
+
+
 })(NEG);
+
 ; (function (neg) {
     base = neg.base || {};
 
@@ -244,11 +250,11 @@
         * @name NEG.base.merge
         * @class [merge 将其他对象赋到mainObj上]
         * @param  {Object} mainObj [merge对象到mainObj上]
-        * @param  {Object} p1,p2,p3... [支持�?��merge多个对象，从第二个参数开始]
+        * @param  {Object} p1,p2,p3... [支持一次merge多个对象，从第二个参数开始]
         * @return {Object}         [返回merge之后的对象]
         * @example 
         * NEG.base.merge({x:1,y:1},{z:1},{a:1})
-        * 结果：返�?{x:1,y:1,z:1,a:1}
+        * 结果：返回 {x:1,y:1,z:1,a:1}
         */
         merge: function (mainObj) {
             for (var index = 1; index < arguments.length; index++) {
@@ -284,12 +290,12 @@
         * @name NEG.base.NS
         * @class [创建命名空间]
         * @param {String} NSString [要创建的命名空间，以点号隔开(Biz.Common)]
-        * @param {Object} root [参数NSString的根节点�?默认是window)]
+        * @param {Object} root [参数NSString的根节点，(默认是window)]
         * @return {Object} [返回创建的对象，若已存在则直接返回]
         * @example
         * NEG.base.NS("Biz.Common").ConsoleOne=function(){console.log(1);};
         * Biz.Common.ConsoleOne();
-        * 结果：输�?1
+        * 结果：输出 1
         */
         NS: function (NSString, root) {
             var nsPath = NSString.split("."), ns = root || window || {}, root = ns;
@@ -301,13 +307,13 @@
         },
         /**
         * @name NEG.base.ArrayIndexOf
-        * @class [返回对象存在数组的index,不存在返�?1]
+        * @class [返回对象存在数组的index,不存在返回-1]
         * @param {Array} array [操作的数组]
         * @param {Object} el [查找的对象]
-        * @returns {number} [返回对象存在数组的Index,不存在返�?1]
+        * @returns {number} [返回对象存在数组的Index,不存在返回-1]
         * @example
         * NEG.base.ArrayIndexOf([1,2,3,5],3);
-        * 结果：返�?2
+        * 结果：返回 2
         */
         ArrayIndexOf: ap.indexOf
                     ? function (array, el) {
@@ -397,7 +403,8 @@
         //}
     };
     _base.merge(base, _base);
-})(NEG); !function (neg) {
+})(NEG);
+!function (neg) {
     var base = neg.base || {};
 
     var _Event = {};
@@ -468,7 +475,7 @@
             var index = i - deletedNum;
             /*
             *Modify by Ben 2012/04/28                
-            *若没有指定eventHanlde,会将targetId和对应eventName的事件句柄全部清�?
+            *若没有指定eventHanlde,会将targetId和对应eventName的事件句柄全部清除
             */
             if (eventHandles[index] && eventHandles[index].eventHandle == eventHandle || !eventHandle) {
                 eventHandles.splice(index, 1);
@@ -537,6 +544,7 @@
     base.Event = base.Event || {};
     base.Event = _Event;
 }(NEG);
+
 ; (function (neg) {
     var utility = {
         isType: function (obj, type) {
@@ -591,6 +599,7 @@
 
     neg.utility = utility;
 })(NEG)
+
 ; (function (neg) {
 
     var environment;
@@ -679,6 +688,7 @@
     }
     neg.utility && (neg.utility.Environment = environment);
 })(NEG)
+
 ; (function (neg) {
     var ap = Array.prototype;
     var arrayHelper = {
@@ -706,6 +716,7 @@
     };
     neg.utility && (neg.utility.Array = arrayHelper);
 })(NEG)
+
 ; (function (neg) {
 
     var entityTable = {
@@ -1033,6 +1044,7 @@
     neg.utility && (neg.utility.Encoding = encodingHelper);
 
 })(NEG)
+
 ; (function (neg) {
     var stringHelper = {
         trim: function (str) {
@@ -1040,11 +1052,12 @@
         }
     };
     neg.utility && (neg.utility.String = stringHelper);
-})(NEG); (function (neg) {
+})(NEG)
+; (function (neg) {
     var theUtility = neg.utility;
 
     var vc = (function () {
-        var versions = [], theModules = neg.cast([]);
+        var versions = [],  theModules = neg.cast([]);
 
         return {
             getVersion: function (module) {
@@ -1089,6 +1102,7 @@
 
     neg.VersionControl = vc;
 })(NEG)
+
 ; (function (neg) {
     //var publicDispatchEvent = neg.base.Event.publicDispatchEvent;
 
@@ -1101,14 +1115,14 @@
 
     //定义队列    
     var queue = {
-        requiring: {}, //正在加载的模�?
+        requiring: {}, //正在加载的模块
         required: {},  //已加载完毕但未构造的模块
         moduleLoaded: {}, //加载并构造完毕的模块
         requireQueue: []  //模块加载意向清单
     };
 
 
-    //监听模块加载状�?，当模块通过 require 方法以外的其他形式加载时，应通过此事件�?知require 记录
+    //监听模块加载状态，当模块通过 require 方法以外的其他形式加载时，应通过此事件通知require 记录
     neg.base.Event.addEventListener(queue, requireEvent.REQUIRING, function (e, data) {
         var moduleName = data.moduleName.toLowerCase();
         queue.requireQueue[moduleName] || queue.requireQueue.push(moduleName);
@@ -1117,7 +1131,7 @@
 
 
 
-    //判断预期加载的模块是否已全部构�?完毕
+    //判断预期加载的模块是否已全部构造完毕
     function isRequireComplete(moduleName) {
         var result;
         if (moduleName) {
@@ -1148,13 +1162,13 @@
     * @name require
     * @class [NEG 模块加载器]
     * @param {String} module [模块命名空间]
-    * @param {String} url [可�?，模块文件路径]
+    * @param {String} url [可选，模块文件路径]
     */
     var require = function (module, url) {
-        //缓存原始命名空间�?
+        //缓存原始命名空间名
         var _module = module;
 
-        //去除命名空间大小写敏�?
+        //去除命名空间大小写敏感
         module = module.toLowerCase();
 
         // 跳过已加载的模块
@@ -1187,7 +1201,7 @@
         })();
 
 
-        //获取模块URL，实参优先级高于模块命名空间解析（此处URL�?��区分大小写）
+        //获取模块URL，实参优先级高于模块命名空间解析（此处URL需要区分大小写）
         url = url || parseModule(_module);
 
 
@@ -1200,23 +1214,23 @@
         //压入require队列，开始加载URL
         function startLoad(module) {
             if (!isRequire(module)) {
-                queue.requiring[module] = true;  //注册正在加载的模�?
+                queue.requiring[module] = true;  //注册正在加载的模块
                 neg.base.BOM.loadJS(url, function () {
                     // queue.required[module] = true; //注册已加载完毕的模块
-                    // 校验模块有效�?
+                    // 校验模块有效性
                     if (!queue.required[module]) {
                         throw new Error("module [" + module + "] is undefined! @" + url);
                     }
 
-                    isRequireComplete() && publicDispatchCompleteEvent(); //如果�?��预期加载的模块都已构造完毕，则广播COMPLETE事件
+                    isRequireComplete() && publicDispatchCompleteEvent(); //如果所有预期加载的模块都已构造完毕，则广播COMPLETE事件
                 });
             }
         }
 
 
 
-        //判断模块是否已经加载�?
-        // return : ture 为已加载过， false 为尚未加�?
+        //判断模块是否已经加载过
+        // return : ture 为已加载过， false 为尚未加载
         function isRequire(module) {
             //return queue.required[module] || queue.requiring[module] || neg.base.NS('ModuleLoaded',neg.base)[module];
             return queue.required[module] || queue.requiring[module] || queue.moduleLoaded[module];
@@ -1229,7 +1243,7 @@
     };
 
 
-    //监听模块加载状�?，当模块加载并构造完毕时出发回调
+    //监听模块加载状态，当模块加载并构造完毕时出发回调
     neg.base.Event.addEventListener(require, requireEvent.LOADED, function (e, data) {
         var moduleName = data.moduleName.toLowerCase();
         queue.required[moduleName] = true;
@@ -1241,10 +1255,11 @@
     require.isRequireComplete = isRequireComplete;
     neg.base.Require = require;
 })(NEG);
+
 ; (function (neg) {
     /**
     * @name NEG.Module
-    * @class [NEG 模块构�?器]
+    * @class [NEG 模块构造器]
     * @param {String} nsString [模块命名空间]
     * @param {Function} module [模块逻辑代码]
     */
@@ -1252,7 +1267,7 @@
     function _module(nsString, module) {
         "use strict"
         var _base = neg.base;
-        //发布消息：模块开始构造，但未构�?完成
+        //发布消息：模块开始构造，但未构造完成
         _base.Event.publicDispatchEvent(_base.Require.Event.REQUIRING, { moduleName: nsString });
 
         //获得模块文件相对路径及文件名
@@ -1310,7 +1325,7 @@
                 ns = _base.NS;
             var activeModule = _base.NS(nsPath.toLowerCase(), _base)[_module];
             var moduleAPI = module(_base.Require, _base.run);
-            if (activeModule) { //如果当前模块已作为父级节点存�?
+            if (activeModule) { //如果当前模块已作为父级节点存在
                 if (typeof (moduleAPI) == 'function') {
                     ns(_nsPath, _base)[_module] = _base.merge(moduleAPI, activeModule);
                 } else {
@@ -1320,7 +1335,7 @@
                 ns(_nsPath, _base)[_module] = moduleAPI;
             }
 
-            //登记已经构�?好的模块，并广播通知
+            //登记已经构造好的模块，并广播通知
             //_base.NS('ModuleLoaded',_base)[nsString] = true;
             loaded[nsString.toLowerCase()] = true;
             _base.Event.publicDispatchEvent(_base.Require.Event.LOADED, { moduleName: nsString });
@@ -1330,7 +1345,8 @@
     }
     neg.base.Module = _module;
 })(NEG);
-; (function (neg) {
+
+;(function (neg) {
     var runnerQueue = [];
     var eventer = neg.base.Event;
     var requireEvent = neg.base.Require.Event;
@@ -1356,16 +1372,16 @@
             return true;
         }
 
-        //监听模块加载状�?，当模块加载并构造完毕时出发回调
+        //监听模块加载状态，当模块加载并构造完毕时出发回调
         this.runNow && eventer.addEventListener(this, requireEvent.LOADED, function (e, data) {
             var moduleName = data.moduleName.toLowerCase();
             requireOfRun[moduleName] = true;
-            neg.base.ArrayIndexOf(requireOfRun, moduleName) >= 0 && isRequireComplete() && runBody && runBody();
+            neg.base.ArrayIndexOf(requireOfRun, moduleName)>=0 && isRequireComplete() && runBody && runBody();
         });
 
         this.run = function (runner) {
             runBody = runner;
-
+            
 
             if (this.runNow) {
                 isRequireComplete() && runner();
@@ -1375,23 +1391,23 @@
             }
         };
 
-        this.require = function (module, url) {
-            neg.base.Require(module, url);
+        this.require = function (module,url) {
+            neg.base.Require(module,url);
 
             module = module.toLowerCase();
             requireOfRun.push(module);
-            if (!url) {
+            if(!url){
                 var ns = module.match(/(^.*)\.(\w*)$/);
                 var nsPath = ns[1];
                 var moduleName = ns[2];
-                neg.base.NS(nsPath, neg.base)[moduleName];
+                neg.base.NS(nsPath,neg.base)[moduleName];
             }
 
-
-            var moduleBody = neg.base.NS(module, neg.base);
-            return moduleBody;
+            
+            var moduleBody = neg.base.NS(module,neg.base);
+            return  moduleBody;
         };
-
+     
 
     }
 
@@ -1401,7 +1417,7 @@
         if (!(this instanceof me)) {
             return new me(fn, runNow);
         }
-
+        
         var context = this;
         context.runNow = runNow;
         _run.call(context);
@@ -1414,21 +1430,21 @@
             return isString ? str : ''
         });
 
-        var requireName = fnBody.replace(/^function\s*?\(\s*?([^,\)]+)[\w\W]*$/i, function (fnbody, reqName) {
-            return reqName;
-        }).replace(fnBody, '');
-        var reg = requireName && new RegExp("\\b" + requireName + "\\s*\\(([^\\)]+)\\)", "igm");
+        var requireName = fnBody.replace(/^function\s*?\(\s*?([^,\)]+)[\w\W]*$/i, function(fnbody, reqName){
+                              return reqName ;
+                            }).replace(fnBody,'');
+        var reg = requireName && new RegExp("\\b" + requireName + "\\s*\\(([^\\)]+)\\)","igm");
         var requireQueue = [];
-        reg && fnBody.replace(reg, function (requireString, nsPath) {
+        reg && fnBody.replace(reg, function(requireString,nsPath){
             var moduleName = nsPath.replace(/['"]/g, '');
             context.require(moduleName);
         });
 
-
-        context.run(function () {
+        
+        context.run(function(){
             fn(context.require, context.run);
         });
-
+        
     };
 
     /**
@@ -1438,7 +1454,8 @@
     * @example 
     */
     neg.base.run = run;
-})(NEG);; (function (NEG) {
+})(NEG);
+; (function (NEG) {
     var base = NEG.base || {};
     var eventHandelList = {};
     function eventHandlePlus(dom, eventType, eventHandle) {
@@ -1567,7 +1584,7 @@
     */
     function dispatchEvent(dom, eventType, option) {
         option = option || { bubbles: false, cancelable: false };
-        option.ieHack = dom.all && dom.all.toString(); // 规避 IE 异常，当 dom 不在DOM树时，IE7�?fireEVent会抛出异常；此处采用赋�?操作以避免js压缩时清除冗余语句；
+        option.ieHack = dom.all && dom.all.toString(); // 规避 IE 异常，当 dom 不在DOM树时，IE7下 fireEVent会抛出异常；此处采用赋值操作以避免js压缩时清除冗余语句；
 
 
         if (document.createEvent) {
@@ -1622,7 +1639,8 @@
        , isEventSupported: isEventSupported
     };
 })(NEG);
-; (function (neg) {
+
+;(function (neg) {
     // 此方法待重构
     var isReady = false;
     var readyHandleQueue = [];
@@ -1634,7 +1652,7 @@
 
 
         //readyHandle = function () { };
-
+        
         //fn();
         var acctiveHandle;
         while (acctiveHandle = readyHandleQueue.shift()) {
@@ -1677,45 +1695,46 @@
     base.NS("NEG.base.BOM").DOMReady = _domReady;
 })(NEG);
 
-; (function (moduleName, neg) {
 
-    function Loader(jsURL, completeHandle) {
+;(function (moduleName, neg) {
+    
+    function Loader(jsURL, completeHandle){
         var jscount = 1;
-        this.loadJS = function () {
-            if (/\bArray\b/.test(Object.prototype.toString.call(jsURL))) {
+        this.loadJS = function(){
+            if(/\bArray\b/.test(Object.prototype.toString.call(jsURL))){
                 jscount = jsURL.length;
                 for (var i = jscount - 1; i >= 0; i--) {
-                    _loadJs(jsURL[i], function () {
+                    _loadJs(jsURL[i], function(){
                         --jscount || completeHandle();
                     });
                 };
-            } else {
+            }else{
                 _loadJs(jsURL, completeHandle);
             }
         };
     }
 
-    function JSLoader() {
+    function JSLoader(){
         var jsQueue = [];
         jsQueue.currentJs = null;
 
-        this.loadJS = function (jsURL, completeHandle) {
-            var fixHandle = function () {
+        this.loadJS = function(jsURL, completeHandle){
+            var fixHandle = function(){
                 jsQueue.currentJs = null;
                 completeHandle && completeHandle();
                 startLoad();
-            };
+            };                
             jsQueue.push(new Loader(jsURL, fixHandle));
-            startLoad();
+            startLoad();            
             return this;
         };
 
-        function startLoad() {
-            if (!jsQueue.currentJs) {
+        function startLoad(){
+            if(!jsQueue.currentJs){
                 jsQueue.currentJs = jsQueue.shift();
                 jsQueue.currentJs && jsQueue.currentJs.loadJS();
-            }
-        }
+            }        
+        }        
 
     }
 
@@ -1733,8 +1752,8 @@
                completeHandle && completeHandle();
            }
            , readyHandle = function () {
-               if (/loaded|complete/.test(jsLoader.readyState) && isComplate == false) {
-                   loadCompleteHandle();
+               if (/loaded|complete/.test(jsLoader.readyState) && isComplate == false) {                 
+                    loadCompleteHandle();                 
                }
            };
         jsLoader.async = true;
@@ -1754,7 +1773,7 @@
         isExisted || head.appendChild(jsLoader);
     };
 
-    function loadJs(jsURL, completeHandle) {
+    function loadJs(jsURL, completeHandle){
         var jsLoader = new JSLoader();
         jsLoader.loadJS(jsURL, completeHandle);
         return jsLoader;
@@ -1771,7 +1790,8 @@
     */
     NEG.base.BOM[moduleName] = loadJs;
 })("loadJS", NEG);
-; (function (neg) {
+
+;(function (neg) {
     var bom = neg.base.BOM = neg.base.BOM || {};
     bom.Utility = bom.Utility || {};
     function isHTMLElement(obj) {
@@ -1797,7 +1817,8 @@
     * 结果：返回false
     */
     bom.Utility.isHTMLElement = isHTMLElement;
-})(NEG);; (function (NEG) {
+})(NEG);
+; (function (NEG) {
 
     var openAPI = {
         run: NEG.base.run,
@@ -1806,7 +1827,7 @@
         * @name NEG.on
         * @class [事件监听及广播]
         * @param {Object} eventName   [事件名]
-        * @param {*} option [事件句柄 �?事件处理参数]
+        * @param {*} option [事件句柄 或 事件处理参数]
         */
         //, on: NEG.base.Event.publicDispatchEvent
 
@@ -1837,7 +1858,7 @@
         * @param {Object} option      [配置选项]
         * @example
         * NEG("body").on("load",function(){console.info("i am ready");},{});
-        * 结果：在onload时间�?输出 i am ready
+        * 结果：在onload时间后 输出 i am ready
         */
         on: function (eventType, eventHandle, option) {
             var target = this.target,
