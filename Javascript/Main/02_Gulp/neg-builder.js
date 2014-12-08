@@ -3,6 +3,8 @@ var concat = require('gulp-concat');
 var rename = require('gulp-rename');
 var convertEncoding = require('fd-gulp-convert-encoding');
 var replace = require('gulp-replace');
+var uglify = require('gulp-uglify');
+
 
 module.exports = function(isProduction){
 	
@@ -41,38 +43,45 @@ module.exports = function(isProduction){
 	]
 
 	var concatCore = function(){
-			gulp.src(coreFiles)
-				.pipe(convertEncoding('utf-8'))
-				.pipe(replace("[$isDebug$]",isProduction?"false":"true"))
-				.pipe(replace("[$NEGFileName$]",NVersion))
-				.pipe(replace("[$baseURL$]",isProduction?"(window.Web.Config.Environment.Url.HttpCache + window.Web.Config.Environment.Path.Scripts+'USA/NeweggJS/')":""))
-				.pipe(concat(NVersion)).pipe(gulp.dest(buildFolder));
-		};
+		gulp.src(coreFiles)
+			.pipe(convertEncoding('utf-8'))
+			.pipe(replace("[$isDebug$]",isProduction?"false":"true"))
+			.pipe(replace("[$NEGFileName$]",NVersion))
+			.pipe(replace("[$baseURL$]",isProduction?"(window.Web.Config.Environment.Url.HttpCache + window.Web.Config.Environment.Path.Scripts+'USA/NeweggJS/')":""))
+			.pipe(concat(NVersion)).pipe(gulp.dest(buildFolder));
+	};
 
 	var buildNeg = function(){
-			gulp.src([sourceFolder+"**/*.js","!"+sourceFolder+"/_Core/","!"+sourceFolder+"/_Core/**"])
-				.pipe(convertEncoding('utf-8'))
-				.pipe(rename(function(path){
-					if(!path){return };
-					switch(path.dirname){
-						case "NEG/Widget/PropertyManager/View/src":
-						case "NEG/Widget/PropertyManager/Model/src":
-							path.dirname=path.dirname="NEG/Widget/PropertyManager/";
-							break;
-						case "NEG/Widget/Form/src":
-							path.dirname=path.dirname="NEG/Widget/Form/";
-						default:
-							path.dirname=path.dirname.replace(/(.*)\/.+?\/src/i,"$1");
-							break;
-					}
-				}))
-				.pipe(gulp.dest(buildFolder));
-		}
+		gulp.src([sourceFolder+"**/*.js","!"+sourceFolder+"/_Core/","!"+sourceFolder+"/_Core/**"])
+			.pipe(convertEncoding('utf-8'))
+			.pipe(rename(function(path){
+				if(!path){return };
+				switch(path.dirname){
+					case "NEG/Widget/PropertyManager/View/src":
+					case "NEG/Widget/PropertyManager/Model/src":
+						path.dirname=path.dirname="NEG/Widget/PropertyManager/";
+						break;
+					case "NEG/Widget/Form/src":
+						path.dirname=path.dirname="NEG/Widget/Form/";
+					default:
+						path.dirname=path.dirname.replace(/(.*)\/.+?\/src/i,"$1");
+						break;
+				}
+			}))
+			.pipe(gulp.dest(buildFolder));
+		};
+
+	var uglifyNeg = function(){
+		
+	}
 
 	return {
 		start:function(){
 			concatCore();
 			buildNeg();
+			if(isProduction){
+				uglifyNeg();
+			}
 		}
 	}
 }
